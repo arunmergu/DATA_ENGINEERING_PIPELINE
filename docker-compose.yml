@@ -20,5 +20,5 @@ services:
 
     # If you were using environment variables from a .env file (e.g., for different DB types or credentials)
     # and had `python-dotenv` configured in your `src/config.py` to load them, you would uncomment this:
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
