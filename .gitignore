@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.egg-info/
+.pytest_cache/
+htmlcov/
+.ipynb_checkpoints
+
+# IDEs
+.idea/
+.vscode/
+
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+logs/
+
+# Database files
+*.db
+*.sqlite
+
+# Sensitive files
+.env

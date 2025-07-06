@@ -1,0 +1,24 @@
+version: '3.8' # Specify the Docker Compose file format version
+
+services:
+  data-pipeline: # Define a service named 'data-pipeline' (you can choose any name)
+    build:
+      context: . # Look for the Dockerfile in the current directory
+      dockerfile: Dockerfile # Specify the name of your Dockerfile
+
+    # Define volume mounts for data persistence
+    # This maps your local 'data' folder to the container's '/app/data' folder.
+    # - Your 'mock_dataset.csv' will be available inside the container at /app/data/mock_dataset.csv
+    # - The 'bynd_pipeline.db' created by the pipeline inside the container (at /app/data/bynd_pipeline.db)
+    #   will automatically be saved to your local 'data' folder.
+    volumes:
+      - ./data:/app/data
+
+    # The command to execute when this service starts.
+    # This runs your main Python pipeline script.
+    command: ["python", "-m", "src.main"]
+
+    # If you were using environment variables from a .env file (e.g., for different DB types or credentials)
+    # and had `python-dotenv` configured in your `src/config.py` to load them, you would uncomment this:
+    env_file:
+      - .env

@@ -1,0 +1,86 @@
+# .github/workflows/data-pipeline.yml
+
+name: Data Pipeline CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events to the 'main' branch
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build-and-run-pipeline:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it.
+
+      - name: Set up Docker Buildx
+        # This action sets up Buildx, a Docker CLI plugin for extended build capabilities.
+        # It's good practice for robust Docker builds.
+        uses: docker/setup-buildx-action@v3
+
+      - name: Make data directory writable (important for volume mounts in CI)
+        # CI runners often have strict permissions. Ensure the 'data' dir can be written to by the container.
+        run: chmod -R 777 data
+
+      - name: Build and Run Data Pipeline with Docker Compose
+        # This command will:
+        # 1. Build the Docker image defined in your Dockerfile.
+        # 2. Start the 'data-pipeline' service defined in your docker-compose.yml.
+        #    This will execute src/main.py inside the container.
+        #    Due to the volume mount, 'mock_dataset.csv' will be read from ./data,
+        #    and 'bynd_pipeline.db' will be written back to ./data on the runner.
+        run: docker compose up --build
+
+      - name: Verify Database Output
+        # Basic checks to ensure the pipeline ran and produced the database file.
+        # This requires sqlite3 to be available on the runner, which is common for ubuntu-latest.
+        run: |
+          echo "Verifying bynd_pipeline.db output..."
+          # Check if the database file exists
+          if [ -f data/bynd_pipeline.db ]; then
+            echo "Database file 'bynd_pipeline.db' found."
+            # List tables inside the database
+            echo "Tables in the database:"
+            sqlite3 data/bynd_pipeline.db ".tables"
+            # Count rows in the main table
+            echo "Row count in customers_and_transactions table:"
+            sqlite3 data/bynd_pipeline.db "SELECT COUNT(*) FROM customers_and_transactions;"
+          else
+            echo "Error: Database file 'bynd_pipeline.db' not found!"
+            exit 1 # Fail the job if the database is not found
+          fi
+
+      - name: Run Python Tests
+        # Ensure pytest is installed in your Dockerfile or environment
+        # This step assumes your Dockerfile installs requirements.txt
+        # and that your tests are accessible inside the container.
+        # Alternatively, you could run pytest directly on the runner if Python is set up.
+        run: |
+          echo "Running Python tests..."
+          # Assuming you have pytest in your requirements.txt
+          # If tests need to run against the Dockerized database, you'd adjust this.
+          # For now, run the tests that use temporary files/DBs.
+          pip install -r requirements.txt # Ensure dependencies are installed on the runner
+          pytest tests/
+
+      - name: Upload Database as Artifact
+        # Uploads the generated 'bynd_pipeline.db' as a workflow artifact.
+        # This allows you to download it directly from the GitHub Actions run summary.
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-output-db
+          path: data/bynd_pipeline.db
+          retention-days: 7 # How long to keep the artifact (optional)
