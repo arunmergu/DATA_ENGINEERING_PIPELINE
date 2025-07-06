@@ -16,7 +16,10 @@ RUN pip install --no-cache-dir --upgrade --force-reinstall numpy pandas
 # which contains your 'mock_dataset.csv'.
 COPY src ./src
 COPY data ./data
+# Copy the 'tests' directory into the container at /app/tests
+COPY tests/ ./tests/
 
+RUN mkdir -p data && chmod -R 777 data
 # Define the command that will be executed when the container starts.
 # This runs your main pipeline script.
 CMD ["python", "-m", "src.main"]
