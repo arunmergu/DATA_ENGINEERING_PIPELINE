@@ -4,6 +4,19 @@
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
+## ✨ Features
+
+* **Data Extraction:** Reads raw data from a CSV file.
+* **Data Transformation:** Cleans, validates, and enhances raw data using Pandas. This includes handling missing values, converting data types, and deriving new features.
+* **Data Loading:** Loads transformed data into a SQLite database using SQLAlchemy.
+* **Containerization:** The entire pipeline is encapsulated in Docker containers for consistent, isolated, and reproducible environments across different systems.
+* **Unit & Integration Tests:** A comprehensive Pytest suite ensures data integrity and validates the correctness of transformations and database interactions.
+* **GitHub Actions CI/CD:**
+    * **Automated Build & Test:** Workflows automatically build Docker images, run the pipeline, and execute tests on every code push and pull request.
+    * **Continuous Delivery:** Generates a processed database artifact (`.db` file) on successful CI runs, available for download.
+* **Local Development Support:** Provides clear instructions for running and testing the pipeline locally for rapid iteration and debugging.
+
+
 ### Prerequisites
 
 Before you begin, ensure you have the following installed on your local machine:
